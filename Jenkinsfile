@@ -15,11 +15,11 @@ pipeline {
                             // Build the Docker image
                             bat 'docker build -t flask-app:latest .'
                             echo "Build finished"
-                            bat 'docker run -d --name flask-app -p 5000:5000 omarelaraby987/flask-app:latest'
+                            bat 'docker run -d --name flask-app -p 5000:5000 flask-app'
                             echo "Container is running"
                             
                             // Optional: Push the image to Docker Hub
-                            bat 'docker push omarelaraby987/flask-app:latest'
+                            bat 'docker push omarelaraby987/flask-app'
                             echo "Image pushed to Docker Hub"
                         }
                     } catch (Exception e) {
