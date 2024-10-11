@@ -7,7 +7,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/arabi7398/Final-project.git'
             }
         }
-        stage('Build') {
+        stage('Build Run & Push') {
             steps {
                 script {
                     try {
@@ -15,6 +15,8 @@ pipeline {
                             // Build the Docker image
                             bat 'docker build -t flask-app:latest .'
                             echo "Build finished"
+                            bat 'docker run -d --name flask-app -p 5000:5000 omarelaraby987/flask-app:latest'
+                            echo "Container is running"
                             
                             // Optional: Push the image to Docker Hub
                             bat 'docker push omarelaraby987/flask-app:latest'
