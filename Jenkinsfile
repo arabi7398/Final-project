@@ -17,7 +17,7 @@ pipeline {
                             echo "Build finished"
                             
                             // Optional: Push the image to Docker Hub
-                            bat 'docker push omarelaraby987/flask-app'
+                            bat 'docker push omarelaraby987/flask-app:latest'
                             echo "Image pushed to Docker Hub"
                         }
                     } catch (Exception e) {
