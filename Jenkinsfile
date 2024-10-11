@@ -18,6 +18,10 @@ pipeline {
                             bat 'docker run -d --name flask-app -p 5000:5000 flask-app'
                             echo "Container is running"
                             
+                            //tag image
+                            bat 'docker tag flask-app:latest omarelaraby987/flask-app:latest'
+                            echo 'tag is added'
+
                             // Optional: Push the image to Docker Hub
                             bat 'docker push omarelaraby987/flask-app'
                             echo "Image pushed to Docker Hub"
