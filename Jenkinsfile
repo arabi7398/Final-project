@@ -9,16 +9,21 @@ pipeline {
         }
         stage('Build') {
             steps {
-                // Using toolName parameter
-               withDockerRegistry(credentialsId: '0697e2ce-e7da-4687-b1df-b7c8cf726dc3', url:'https://index.docker.io/v1/') {
-
-                    // Build the Docker image
-                    sh 'docker build -t flask-app:latest .'
-                    echo "Build finished"
-                    
-                    // Optional: Push the image to Docker Hub
-                    sh 'docker push omarelaraby987/flask-app:latest'
-                    echo "Image pushed to Docker Hub"
+                script {
+                    try {
+                        withDockerRegistry(credentialsId: '0697e2ce-e7da-4687-b1df-b7c8cf726dc3', url: 'https://index.docker.io/v1/') {
+                            // Build the Docker image
+                            sh 'docker build -t flask-app:latest .'
+                            echo "Build finished"
+                            
+                            // Optional: Push the image to Docker Hub
+                            sh 'docker push omarelaraby987/flask-app:latest'
+                            echo "Image pushed to Docker Hub"
+                        }
+                    } catch (Exception e) {
+                        echo "Error during the build process: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                    }
                 }
             }
         }
