@@ -31,6 +31,7 @@
         name: "omarelaraby987/flask-app"
         tag: "{{ latest_tag }}"  # Use the latest_tag variable
         state: present  # Ensures the image is pulled if not present
+        source: "pull"
       register: pull_result
 
     - name: Echo Docker image pull result
