@@ -1,0 +1,87 @@
+- name: Deploy Flask Application
+  hosts: localhost
+  become: yes  # Use sudo to run commands as root
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Get all Docker image tags
+      shell: "docker images --format '{{ \"{{.Tag}}\" }}' omarelaraby987/flask-app"
+      register: tags_output
+      changed_when: false
+
+    - name: Echo Docker image tags
+      debug:
+        msg: "Docker image tags: {{ tags_output.stdout_lines }}"
+
+    - name: Set the latest tag variable
+      set_fact:
+        latest_tag: "{{ tags_output.stdout_lines | sort(reverse=True) | first }}"
+
+    - name: Debug latest tag
+      debug:
+        msg: "Latest Docker tag is {{ latest_tag }}"
+
+    - name: Pull the latest Docker image
+      community.docker.docker_image:
+        name: "omarelaraby987/flask-app"
+        tag: "{{ latest_tag }}"  # Use the latest_tag variable
+        state: present  # Ensures the image is pulled if not present
+      register: pull_result
+
+    - name: Echo Docker image pull result
+      debug:
+        msg: "Docker pull result: {{ pull_result }}"
+
+    - name: Stop existing container
+      community.docker.docker_container:
+        name: flask-app
+        state: stopped
+      ignore_errors: yes
+      register: stop_result
+
+    - name: Echo stop container result
+      debug:
+        msg: "Container stop result: {{ stop_result }}"
+
+    - name: Remove existing container
+      community.docker.docker_container:
+        name: flask-app
+        state: absent
+      ignore_errors: yes
+      register: remove_result
+
+    - name: Echo remove container result
+      debug:
+        msg: "Container remove result: {{ remove_result }}"
+
+    - name: Run new container
+      community.docker.docker_container:
+        name: flask-app
+        image: "omarelaraby987/flask-app:{{ latest_tag }}"
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "5000:5000"
+        env:
+          FLASK_ENV: production
+      register: run_result
+
+    - name: Echo run container result
+      debug:
+        msg: "Container run result: {{ run_result }}"
+
+    - name: Clean up unused images
+      community.docker.docker_image:
+        name: "omarelaraby987/flask-app"
+        state: absent
+        filter: dangling=true
+      register: cleanup_result
+
+    - name: Echo image cleanup result
+      debug:
+        msg: "Image cleanup result: {{ cleanup_result }}"
