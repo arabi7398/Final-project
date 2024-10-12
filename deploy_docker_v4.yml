@@ -9,11 +9,15 @@
         state: present
       when: ansible_os_family == "Debian"
 
+    #- name: Get the latest Docker image tag
+    #  command: "docker images --format '{{.Tag}}' omarelaraby987/flask-app | sort -r | head -n 1"
+    #  register: latest_tag
+    #  changed_when: false  # This task is not changing any state, just fetching data
     - name: Get the latest Docker image tag
-      ansible.builtin.shell: "docker images --format '{{.Tag}}' omarelaraby987/flask-app | sort -r | head -n 1"
+      command: docker images --format '{{.Tag}}' omarelaraby987/flask-app
       register: latest_tag
       changed_when: false  # This task is not changing any state, just fetching data
-
+ 
     - name: Debug latest tag
       debug:
         var: latest_tag
