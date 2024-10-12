@@ -35,9 +35,9 @@
     - name: Pull the latest Docker image
       community.docker.docker_image:
         name: "omarelaraby987/flask-app"
-        tag: "{{ docker_tag }}"  # Use the docker_tag variable passed from Jenkins
-        state: present  # This will ensure the image is pulled if it's not present
-        register: pull_result
+        tag: "{{ latest_tag }}"  # Use the docker_tag variable passed from Jenkins
+        state: present  # Ensures the image is pulled if not present
+      register: pull_result
 
     - name: Echo Docker image pull result
       debug:
