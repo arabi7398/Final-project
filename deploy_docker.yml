@@ -1,7 +1,7 @@
 ---
 - name: Deploy Flask Application
   hosts: localhost # Replace with your target server's hostname or IP address
-  become: no  # Use sudo to run commands as root
+  become: yes  # Use sudo to run commands as root
 
   vars:
     docker_image_name: "omarelaraby987/flask-app"  # Define the image name as a variable
