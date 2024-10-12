@@ -1,0 +1,54 @@
+- name: Deploy Flask Application
+  hosts: localhost  # Replace with your target server's hostname or IP address
+  become: yes  # Use sudo to run commands as root
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Get all Docker image tags
+      command: docker images --format '{{.Tag}}' omarelaraby987/flask-app
+      register: tags_output
+      changed_when: false
+
+    - name: Set the latest tag variable
+      set_fact:
+        latest_tag: "{{ tags_output.stdout_lines | sort(reverse=True) | first }}"
+
+    - name: Pull the latest Docker image
+      community.docker.docker_image:
+        name: "omarelaraby987/flask-app"  # Define the image name directly
+        tag: "{{ latest_tag }}"  # Use the fetched latest tag
+        pull: yes
+
+    - name: Stop existing container
+      community.docker.docker_container:
+        name: flask-app  # Replace with your container name
+        state: stopped
+      ignore_errors: yes  # Ignore errors if the container is not running
+
+    - name: Remove existing container
+      community.docker.docker_container:
+        name: flask-app  # Replace with your container name
+        state: absent
+      ignore_errors: yes  # Ignore errors if the container does not exist
+
+    - name: Run new container
+      community.docker.docker_container:
+        name: flask-app  # Replace with your container name
+        image: "omarelaraby987/flask-app:{{ latest_tag }}"  # Use the fetched latest tag
+        state: started
+        restart_policy: unless-stopped  # Restart policy for the container
+        published_ports:
+          - "5000:5000"  # Map host port 5000 to container port 5000 (adjust as needed)
+        env:
+          FLASK_ENV: production  # Example environment variable for Flask
+
+    - name: Clean up unused images
+      community.docker.docker_image:
+        name: "omarelaraby987/flask-app"  # Define the image name directly
+        state: absent
+        filter: dangling=true  # Removes dangling images only
