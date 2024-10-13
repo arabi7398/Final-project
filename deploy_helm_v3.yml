@@ -9,18 +9,26 @@
         state: present
       when: ansible_os_family == "Debian"
 
+    #- name: Get all Docker image tags
+    #  community.docker.docker_image_facts:
+    #    name: "omarelaraby987/flask-app"
+    #  register: docker_image_info
+
+    #- name: Set the latest tag variable
+      #set_fact:
+        #latest_tag: "{{ docker_image_info.images[0].tags | sort(reverse=True) | first }}"
+
     - name: Get all Docker image tags
-      community.docker.docker_image_facts:
-        name: "omarelaraby987/flask-app"
-      register: docker_image_info
+      shell: "docker images --format '{{ \"{{.Tag}}\" }}' omarelaraby987/flask-app"
+      register: tags_output
+      changed_when: false
 
-    - name: Set the latest tag variable
-      set_fact:
-        latest_tag: "{{ docker_image_info.images[0].tags | sort(reverse=True) | first }}"
-
-    - name: Debug latest tag
+    - name: Echo Docker image tags
       debug:
-        msg: "Latest Docker tag is {{ latest_tag }}"
+        msg: "Docker image tags: {{ tags_output.stdout_lines }}"  
+    #- name: Debug latest tag
+    #  debug:
+    #    msg: "Latest Docker tag is {{ latest_tag }}"
 
     - name: Create helm chart directory structure
       file:
