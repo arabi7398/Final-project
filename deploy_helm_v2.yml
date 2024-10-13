@@ -34,7 +34,7 @@
     - name: Create values.yaml file with dynamic Docker tag
       template:
         dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/values.yaml  # Replace with your desired path
-        src: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/values.yaml.j2  # Use a Jinja2 template file to insert dynamic tag
+        src: /var/lib/jenkins/workspace/CI-CD\ test\ 2/values.yaml.j2  # Use a Jinja2 template file to insert dynamic tag
 
     - name: Create _helpers.tpl file
       copy:
