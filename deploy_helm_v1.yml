@@ -1,0 +1,85 @@
+---
+- name: Deploy Flask Application with Helm
+  hosts: localhost
+  become: yes  # Use sudo to run commands as root
+
+  tasks:
+    - name: Ensure Helm is installed
+      apt:
+        name: helm
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Kubernetes CLI (kubectl) is installed
+      apt:
+        name: kubectl
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Configure Kubernetes context
+      shell: "kubectl config use-context <your-context-name>"  # Replace with your context name
+      register: kubectl_context
+      changed_when: kubectl_context.rc != 0
+
+    - name: Debug Kubernetes context result
+      debug:
+        msg: "Kubernetes context configured: {{ kubectl_context }}"
+
+    - name: Create namespace for Flask application
+      community.kubernetes.k8s:
+        name: flask-app-namespace
+        state: present
+        kind: Namespace
+
+    - name: Get all Docker image tags
+      shell: "docker images --format '{{ '{{.Tag}}' }}' omarelaraby987/flask-app"
+      register: tags_output
+      changed_when: false
+
+    - name: Echo Docker image tags
+      debug:
+        msg: "Docker image tags: {{ tags_output.stdout_lines }}"
+
+    - name: Set the latest tag variable
+      set_fact:
+        latest_tag: "{{ tags_output.stdout_lines | sort(reverse=True) | first }}"
+
+    - name: Debug latest tag
+      debug:
+        msg: "Latest Docker tag is {{ latest_tag }}"
+
+    - name: Deploy Flask application with Helm
+      community.kubernetes.helm:
+        name: flask-app
+        chart: ./flask-app-chart  # Path to your Helm chart
+        namespace: flask-app-namespace  # Specify the namespace for the deployment
+        values:
+          image:
+            repository: omarelaraby987/flask-app
+            tag: "{{ latest_tag }}"  # Use the latest Docker tag
+          service:
+            type: NodePort
+            port: 5000
+            targetPort: 5000
+        state: present
+      register: helm_result
+
+    - name: Echo Helm deploy result
+      debug:
+        msg: "Helm deployment result: {{ helm_result }}"
+
+    - name: Clean up unused Docker images (dangling)
+      community.docker.docker_image:
+        name: "omarelaraby987/flask-app"
+        state: absent  # Remove the image if present
+        force_absent: yes  # Force removal of the image if it exists
+      register: cleanup_result
+
+    - name: Remove dangling images
+      command: docker rmi $(docker images -f "dangling=true" -q)  # Remove dangling images directly
+      ignore_errors: yes  # Ignore errors if no dangling images found
+      register: dangling_cleanup_result
+
+    - name: Echo dangling image cleanup result
+      debug:
+        msg: "Dangling image cleanup result: {{ dangling_cleanup_result }}"
