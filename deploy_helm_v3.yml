@@ -81,7 +81,7 @@
               spec:
                 containers:
                   - name: flask-app
-                    image: "{{ image.repository }}:{{ image.tag }}"
+                    image: "omarelaraby987/flask-app:{{ latest_tag }}"  # Directly use the latest_tag variable
                     ports:
                       - containerPort: 5000
 
