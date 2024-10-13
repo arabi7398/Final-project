@@ -107,4 +107,4 @@
               app: flask-app
 
     - name: Install Helm chart
-      command: helm install flask-app /var/lib/jenkins/workspace/CI-CD test 2/flask-app --set image.tag={{ latest_tag }}
+      command: helm install flask-app /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app --set image.tag={{ latest_tag }}
