@@ -1,0 +1,86 @@
+- name: Deploy Flask Application
+  hosts: localhost
+  become: yes  # Use sudo to run commands as root
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Get all Docker image tags
+      community.docker.docker_image_facts:
+        name: "omarelaraby987/flask-app"
+      register: docker_image_info
+
+    - name: Set the latest tag variable
+      set_fact:
+        latest_tag: "{{ docker_image_info.images[0].tags | sort(reverse=True) | first }}"
+
+    - name: Debug latest tag
+      debug:
+        msg: "Latest Docker tag is {{ latest_tag }}"
+
+    - name: Create helm chart directory structure
+      file:
+        path: /var/lib/jenkins/workspace/CI-CD test 2/flask-app
+        state: directory
+
+    - name: Create Chart.yaml
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/Chart.yaml
+        content: |
+          apiVersion: v2
+          name: flask-app
+          version: 0.1.0
+
+    - name: Create values.yaml with dynamic Docker tag
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/values.yaml
+        content: |
+          image:
+            repository: "omarelaraby987/flask-app"
+            tag: "{{ latest_tag }}"  # Use the latest_tag variable fetched from Docker
+
+    - name: Create deployment.yaml
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/templates/deployment.yaml
+        content: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: flask-app
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: flask-app
+            template:
+              metadata:
+                labels:
+                  app: flask-app
+              spec:
+                containers:
+                  - name: flask-app
+                    image: "{{ image.repository }}:{{ image.tag }}"
+                    ports:
+                      - containerPort: 5000
+
+    - name: Create service.yaml
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/templates/service.yaml
+        content: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: flask-app
+          spec:
+            type: LoadBalancer
+            ports:
+              - port: 5000
+            selector:
+              app: flask-app
+
+    - name: Install Helm chart
+      command: helm install flask-app /var/lib/jenkins/workspace/CI-CD test 2/flask-app --set image.tag={{ latest_tag }}
