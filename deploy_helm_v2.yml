@@ -1,0 +1,123 @@
+---
+- name: Deploy Flask Application with Helm
+  hosts: localhost
+  become: yes  # Use sudo to run commands as root
+
+  tasks:
+    - name: Ensure Helm is installed
+      command: "helm version"
+      register: helm_installed
+      failed_when: helm_installed.rc != 0
+      ignore_errors: no
+
+    - name: Create Helm chart directory
+      file:
+        path: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app  # Replace with your desired path
+        state: directory
+
+    - name: Create templates directory for Helm chart
+      file:
+        path: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates  # Replace with your desired path
+        state: directory
+
+    - name: Create Chart.yaml file
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/Chart.yaml  # Replace with your desired path
+        content: |
+          apiVersion: v2
+          name: flask-app
+          description: A Helm chart for deploying a Flask application
+          version: 1.0.0
+          appVersion: "1.0"
+          type: application
+
+    - name: Create values.yaml file with dynamic Docker tag
+      template:
+        dest: /path/to/flask-app/values.yaml  # Replace with your desired path
+        src: /path/to/templates/values.yaml.j2  # Use a Jinja2 template file to insert dynamic tag
+
+    - name: Create _helpers.tpl file
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/_helpers.tpl  # Replace with your desired path
+        content: |
+          {{- define "flask-app.fullname" -}}
+          {{ .Release.Name }}-flask-app
+          {{- end }}
+
+    - name: Create deployment.yaml template
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/deployment.yaml  # Replace with your desired path
+        content: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: {{ include "flask-app.fullname" . }}
+            labels:
+              app: flask-app
+          spec:
+            replicas: {{ .Values.replicaCount }}
+            selector:
+              matchLabels:
+                app: flask-app
+            template:
+              metadata:
+                labels:
+                  app: flask-app
+              spec:
+                containers:
+                - name: flask-app
+                  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+                  ports:
+                  - containerPort: 5000
+                  resources: {{ toYaml .Values.resources | indent 10 }}
+
+    - name: Create service.yaml template
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/service.yaml  # Replace with your desired path
+        content: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: {{ include "flask-app.fullname" . }}
+          spec:
+            type: {{ .Values.service.type }}
+            ports:
+              - port: {{ .Values.service.port }}
+                targetPort: {{ .Values.service.targetPort }}
+            selector:
+              app: flask-app
+
+    - name: Create replicaset.yaml template
+      copy:
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/replicaset.yaml  # Replace with your desired path
+        content: |
+          apiVersion: apps/v1
+          kind: ReplicaSet
+          metadata:
+            name: {{ include "flask-app.fullname" . }}-replicaset
+            labels:
+              app: flask-app
+          spec:
+            replicas: {{ .Values.replicaCount }}
+            selector:
+              matchLabels:
+                app: flask-app
+            template:
+              metadata:
+                labels:
+                  app: flask-app
+              spec:
+                containers:
+                - name: flask-app
+                  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+                  ports:
+                  - containerPort: 5000
+
+    - name: Deploy Flask Application using Helm with Docker tag
+      command: >
+        helm upgrade --install flask-app /path/to/flask-app
+        --set image.tag="{{ docker_tag }}"
+      args:
+        executable: /bin/bash
+      environment:
+        docker_tag: "{{ lookup('env', 'DOCKER_TAG') }}"
