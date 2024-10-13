@@ -106,5 +106,16 @@
             selector:
               app: flask-app
 
+   # - name: Install Helm chart
+    #  command: helm install flask-app /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app --set image.tag={{ latest_tag }}
     - name: Install Helm chart
-      command: helm install flask-app /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app --set image.tag={{ latest_tag }}
+      community.kubernetes.helm:
+        name: flask-app
+        chart: "/var/lib/jenkins/workspace/CI-CD test 2/flask-app"
+        set:
+         image.tag: "{{ latest_tag }}"
+      register: helm_install_result
+
+    - name: Debug Helm install result 
+      debug:
+        var: helm_install_result
