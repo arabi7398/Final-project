@@ -101,6 +101,8 @@
             tag: "{{ latest_tag }}"
         create_namespace: true  # Optional: Set to true if you want to create the namespace if it doesn't exist
         release_namespace: default  # Change 'default' to your desired namespace
+        extra_args: 
+        - "--debug"  # Add this line for verbose output
       register: helm_install_result
 
     - name: Debug Helm install result
