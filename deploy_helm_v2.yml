@@ -12,17 +12,17 @@
 
     - name: Create Helm chart directory
       file:
-        path: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app  # Replace with your desired path
+        path: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app  # Replace with your desired path
         state: directory
 
     - name: Create templates directory for Helm chart
       file:
-        path: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates  # Replace with your desired path
+        path: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/templates  # Replace with your desired path
         state: directory
 
     - name: Create Chart.yaml file
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/Chart.yaml  # Replace with your desired path
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/Chart.yaml  # Replace with your desired path
         content: |
           apiVersion: v2
           name: flask-app
@@ -33,12 +33,12 @@
 
     - name: Create values.yaml file with dynamic Docker tag
       template:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/values.yaml  # Replace with your desired path
-        src: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/values.yaml.j2  # Use a Jinja2 template file to insert dynamic tag
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/values.yaml  # Replace with your desired path
+        src: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/values.yaml.j2  # Use a Jinja2 template file to insert dynamic tag
 
     - name: Create _helpers.tpl file
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/_helpers.tpl  # Replace with your desired path
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/templates/_helpers.tpl  # Replace with your desired path
         content: |
           {{- define "flask-app.fullname" -}}
           {{ .Release.Name }}-flask-app
@@ -46,7 +46,7 @@
 
     - name: Create deployment.yaml template
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/deployment.yaml  # Replace with your desired path
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/templates/deployment.yaml  # Replace with your desired path
         content: |
           apiVersion: apps/v1
           kind: Deployment
@@ -73,7 +73,7 @@
 
     - name: Create service.yaml template
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/service.yaml  # Replace with your desired path
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/templates/service.yaml  # Replace with your desired path
         content: |
           apiVersion: v1
           kind: Service
@@ -89,7 +89,7 @@
 
     - name: Create replicaset.yaml template
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 20/flask-app/templates/replicaset.yaml  # Replace with your desired path
+        dest: /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app/templates/replicaset.yaml  # Replace with your desired path
         content: |
           apiVersion: apps/v1
           kind: ReplicaSet
