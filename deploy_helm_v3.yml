@@ -26,6 +26,16 @@
     - name: Echo Docker image tags
       debug:
         msg: "Docker image tags: {{ tags_output.stdout_lines }}"  
+
+        
+    - name: Set the latest tag variable
+      set_fact:
+        latest_tag: "{{ tags_output.stdout_lines | sort(reverse=True) | first }}"
+
+    - name: Debug latest tag
+      debug:
+        msg: "Latest Docker tag is {{ latest_tag }}"
+
     #- name: Debug latest tag
     #  debug:
     #    msg: "Latest Docker tag is {{ latest_tag }}"
