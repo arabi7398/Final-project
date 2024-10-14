@@ -1,5 +1,5 @@
 - name: Deploy Flask Application
-  hosts: localhost
+  hosts: minikube
   become: yes  # Use sudo to run commands as root
 
   tasks:
