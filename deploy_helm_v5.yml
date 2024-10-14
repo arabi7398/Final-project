@@ -1,6 +1,6 @@
 - name: Deploy Flask Application
   hosts: minikube
-  become: no  # Use sudo to run commands as root
+  become: yes  # Use sudo to run commands as root
 
   tasks:
     - name: Ensure Docker is installed
