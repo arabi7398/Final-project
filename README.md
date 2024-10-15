@@ -13,3 +13,7 @@ Ansible: Manages configuration and automates deployments.
 Kubernetes (optional): Orchestrates Docker containers.
 Cloud: AWS or GCP for deployment.
 CI/CD Pipeline: Automates the workflow from code commit to cloud deployment.
+
+
+
+test 1
