@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  
+  # Install Docker
+  - name: Update apt packages
+    apt:
+      update_cache: yes
+  
+  - name: Install Docker dependencies
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+      state: present
+
+  - name: Add Docker GPG key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add Docker repository
+    apt_repository:
+      repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      state: present
+
+  - name: Install Docker
+    apt:
+      name: docker-ce
+      state: latest
+      update_cache: yes
+
+  - name: Add user to docker group
+    user:
+      name: "{{ ansible_user }}"
+      groups: docker
+      append: yes
+
+  - name: Ensure Docker is started and enabled
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  # Install Jenkins
+  - name: Install Java (Jenkins dependency)
+    apt:
+      name: openjdk-11-jdk
+      state: present
+
+  - name: Add Jenkins GPG key
+    apt_key:
+      url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      state: present
+
+  - name: Add Jenkins APT repository
+    apt_repository:
+      repo: "deb http://pkg.jenkins.io/debian-stable binary/"
+      state: present
+
+  - name: Update apt cache after adding Jenkins repo
+    apt:
+      update_cache: yes
+
+  - name: Install Jenkins
+    apt:
+      name: jenkins
+      state: latest
+      update_cache: yes
+
+  - name: Ensure Jenkins is started and enabled
+    service:
+      name: jenkins
+      state: started
+      enabled: yes
+
+  - name: Open firewall for Jenkins (port 8080)
+    ufw:
+      rule: allow
+      port: '8080'
+      proto: tcp
