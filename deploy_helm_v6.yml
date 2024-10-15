@@ -92,11 +92,11 @@
             selector:
               app: flask-app
 
-    - name: Install Helm chart
-      shell: |
-        helm install flask-app /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app --namespace=default
-      register: helm_install_result
+   # - name: Install Helm chart
+  #    shell: |
+ #       helm install flask-app /var/lib/jenkins/workspace/CI-CD\ test\ 2/flask-app --namespace=test
+#      register: helm_install_result
 
-    - name: Debug Helm install result
-      debug:
-        var: helm_install_result
+  #  - name: Debug Helm install result
+ #     debug:
+#        var: helm_install_result
