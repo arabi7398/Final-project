@@ -1,0 +1,19 @@
+---
+- name: Test Kubernetes Connectivity
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Ensure kubectl is installed
+      command: kubectl version --short
+      register: kubectl_version
+      failed_when: kubectl_version.rc != 0
+
+    - name: Get Kubernetes nodes
+      command: kubectl get nodes
+      register: kubectl_nodes
+      failed_when: kubectl_nodes.rc != 0
+
+    - name: Display Kubernetes nodes
+      debug:
+        var: kubectl_nodes.stdout_lines
