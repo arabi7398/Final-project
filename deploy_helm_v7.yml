@@ -10,7 +10,7 @@
       when: ansible_os_family == "Debian"
 
     - name: Get all Docker image tags
-      shell: "docker images --format '{{ .Tag }}' omarelaraby987/flask-app"
+      shell: "docker images --format '{{ \"{{.Tag}}\" }}'  omarelaraby987/flask-app"
       register: tags_output
       changed_when: false
 
