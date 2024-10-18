@@ -17,3 +17,5 @@ CI/CD Pipeline: Automates the workflow from code commit to cloud deployment.
 
 
 test 1
+
+test after K8s fix to apply deployment using Helm module.
