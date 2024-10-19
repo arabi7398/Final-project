@@ -1,5 +1,6 @@
 - name: Deploy Flask Application
-  hosts: all
+  hosts: localhost
+  remote_user: jenkins  # Specify the Jenkins user
   become: yes  # Use sudo to run commands as root
 
   tasks:
@@ -28,17 +29,17 @@
 
     - name: Create helm chart directory structure
       file:
-        path: /var/lib/jenkins/workspace/CI-CD test 2/flask-app
+        path: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app
         state: directory
 
     - name: Create templates directory
       file:
-        path: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/templates
+        path: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app/templates
         state: directory
 
     - name: Create Chart.yaml
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/Chart.yaml
+        dest: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app/Chart.yaml
         content: |
           apiVersion: v2
           name: flask-app
@@ -46,7 +47,7 @@
 
     - name: Create values.yaml with dynamic Docker tag
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/values.yaml
+        dest: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app/values.yaml
         content: |
           image:
             repository: "omarelaraby987/flask-app"
@@ -54,7 +55,7 @@
 
     - name: Create deployment.yaml
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/templates/deployment.yaml
+        dest: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app/templates/deployment.yaml
         content: |
           apiVersion: apps/v1
           kind: Deployment
@@ -78,7 +79,7 @@
 
     - name: Create service.yaml
       copy:
-        dest: /var/lib/jenkins/workspace/CI-CD test 2/flask-app/templates/service.yaml
+        dest: /var/lib/jenkins/workspace/CI-CD_test_2/flask-app/templates/service.yaml
         content: |
           apiVersion: v1
           kind: Service
@@ -93,8 +94,9 @@
 
     - name: Install Helm chart
       community.kubernetes.helm:
+        kubeconfig: /var/lib/jenkins/.kube/config
         release_name: flask-app
-        chart_ref: "/var/lib/jenkins/workspace/CI-CD test 2/flask-app"
+        chart_ref: "/var/lib/jenkins/workspace/CI-CD_test_2/flask-app"
         release_values:
           image:
             repository: "omarelaraby987/flask-app"
