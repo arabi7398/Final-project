@@ -5,7 +5,7 @@
 
   tasks:
     - name: Ensure kubectl is installed
-      command: kubectl version --short
+      command: kubectl version
       register: kubectl_version
       failed_when: kubectl_version.rc != 0
 
