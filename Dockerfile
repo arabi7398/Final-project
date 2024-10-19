@@ -10,6 +10,9 @@ COPY requirements.txt requirements.txt
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install the node exporter
+RUN pip install Flask prometheus_flask_exporter
+
 
 # Copy the application code
 COPY app.py app.py

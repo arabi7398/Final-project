@@ -1,7 +1,11 @@
 from flask import Flask
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
+@metrics.export
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
